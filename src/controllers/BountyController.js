@@ -1,10 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-// import {
-//     AccountHttp, NEMLibrary, NetworkTypes, Address, Account, TransferTransaction, TimeWindow,
-//     EmptyMessage, MultisigTransaction, PublicAccount, TransactionHttp, SignedTransaction
-// } from "nem-library";
 const nemLibrary = require("nem-library");
 const AccountHttp = nemLibrary.AccountHttp;
 const NEMLibrary = nemLibrary.NEMLibrary;
@@ -26,8 +22,8 @@ const MosaicProperties = require("nem-library/dist/src/models/mosaic/MosaicDefin
 // Initialize NEMLibrary for TEST_NET Network
 NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
 
-const privateKey = process.env.PRIVATE_KEY;
-const cosignerAccount = Account.createWithPrivateKey(privateKey);
+const projectPrivateKey = process.env.PRIVATE_KEY;
+const projetCosignerAccount = Account.createWithPrivateKey(projectPrivateKey);
 const AMOUNT = 1;
 
 
@@ -48,7 +44,34 @@ router.post('/pick', (req,res)=>{
 
     const transactionHttp = new TransactionHttp();
 
-    const signedTransaction = cosignerAccount.signTransaction(transferTransaction);
+    const signedTransaction = projetCosignerAccount.signTransaction(transferTransaction);
+
+    transactionHttp.announceTransaction(signedTransaction).subscribe( x => {
+        console.log(x);
+        res.send(x); 
+    });
+});
+
+
+router.post('/exchange', (req,res)=>{
+    console.log("body: ",req.body);
+    const name=req.body.name;
+    const privateKey=req.body.privateKey;
+    const account = Account.createWithPrivateKey(privateKey);
+
+    const mosaicId=new MosaicId("hunter",name);
+    const mosaicTransferable = new MosaicTransferable(mosaicId,new MosaicProperties(),AMOUNT);
+
+    const transferTransaction = TransferTransaction.createWithMosaics(
+        TimeWindow.createWithDeadline(),
+        projetCosignerAccount.address,
+        [mosaicTransferable],
+        EmptyMessage
+    );
+
+    const transactionHttp = new TransactionHttp();
+
+    const signedTransaction = account.signTransaction(transferTransaction);
 
     transactionHttp.announceTransaction(signedTransaction).subscribe( x => {
         console.log(x);
