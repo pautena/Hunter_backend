@@ -21,8 +21,7 @@ const MosaicId = require("nem-library/dist/src/models/mosaic/MosaicId").MosaicId
 const MosaicTransferable = require("nem-library/dist/src/models/mosaic/MosaicTransferable").MosaicTransferable;
 const MosaicProperties = require("nem-library/dist/src/models/mosaic/MosaicDefinition").MosaicProperties;
 
-// Initialize NEMLibrary for TEST_NET Network
-NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
+
 
 const projectPrivateKey = process.env.PRIVATE_KEY;
 const projetCosignerAccount = Account.createWithPrivateKey(projectPrivateKey);
@@ -49,7 +48,6 @@ router.post('/pick', (req,res)=>{
     const signedTransaction = projetCosignerAccount.signTransaction(transferTransaction);
 
     transactionHttp.announceTransaction(signedTransaction).subscribe( x => {
-        console.log(x);
         res.send(x); 
     },err => {
         console.log(`Something went wrong: ${err.message}`);
@@ -111,7 +109,6 @@ router.post('/exchange', (req,res)=>{
             const signedTransaction = account.signTransaction(transferTransaction);
 
             transactionHttp.announceTransaction(signedTransaction).subscribe( x => {
-                console.log(x);
                 res.send(x); 
             },err => {
                 console.log(`Something went wrong: ${err.message}`);
@@ -122,5 +119,6 @@ router.post('/exchange', (req,res)=>{
         }
     });
 });
+
 
 module.exports = router;
